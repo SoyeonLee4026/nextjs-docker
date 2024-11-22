@@ -1,4 +1,4 @@
-name: CI for Pull Request # workflow 의 이름
+name: CI for Pull Request and Push
 
 on:
   push:
@@ -10,10 +10,13 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -28,5 +31,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/next-app:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
