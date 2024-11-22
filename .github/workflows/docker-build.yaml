@@ -1,13 +1,16 @@
 name: CI for Pull Request # workflow 의 이름
 
-on: # 해당 workflow 가 trigger 될 event 를 설정합니다
-  pull_request: # pull_request event 일 때,
-    branches: # main branch 에 대한 event 일 때,
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
       - main
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
