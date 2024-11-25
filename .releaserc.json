@@ -53,13 +53,6 @@
       }
     ],
     [
-      "@semantic-release/changelog",
-      {
-        "changelogFile": "CHANGELOG.md",
-        "changelogTitle": "# CHANGELOG"
-      }
-    ],
-    [
       "@semantic-release/npm",
       {
         "pkgRoot": ".",
