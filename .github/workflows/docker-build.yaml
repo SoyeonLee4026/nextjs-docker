@@ -1,34 +1,65 @@
 name: CI for Pull Request and Push
 
+# 워크플로우 트리거 설정
 on:
   push:
     branches:
-      - main
+      - main # main 브랜치에 푸시될 때 워크플로우 실행
   pull_request:
     branches:
-      - main
+      - main # main 브랜치로의 풀 리퀘스트 생성 시 워크플로우 실행
 
 jobs:
   build-and-push:
-    runs-on: self-hosted
+    runs-on: self-hosted # 자체 호스팅된 러너에서 작업을 실행
     steps:
+      # 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # 전체 Git 히스토리를 가져와서 작업
 
+      # Node.js 설정
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20" # Node.js 버전 20을 사용하여 환경 설정
+
+      # 의존성 설치
+      - name: Install dependencies
+        run: npm ci # package-lock.json을 기반으로 의존성 설치
+
+      # Docker Buildx 설정
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v2 # 멀티 플랫폼 빌드를 위한 Buildx 설정
 
+      # Docker Hub 로그인
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }} # Docker Hub 사용자 이름 (시크릿)
+          password: ${{ secrets.DOCKER_HUB_TOKEN }} # Docker Hub 액세스 토큰 (시크릿)
 
+      # Semantic Release 실행 (main 브랜치 푸시 시에만)
+      - name: Semantic Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # GitHub API 접근을 위한 토큰 (시크릿)
+        run: npx semantic-release # Semantic Release를 통해 자동 버전 관리 및 릴리스 생성
+
+      # package.json에서 버전 추출
+      - name: Get version from package.json
+        id: package-version
+        run: echo "::set-output name=version::$(node -p "require('./package.json').version")" # 현재 패키지 버전을 추출하여 출력
+
+      # Docker 이미지 빌드 및 푸시
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/next-app:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          context: . # 현재 디렉토리를 컨텍스트로 사용하여 빌드 시작
+          push: ${{ github.event_name != 'pull_request' }} # 풀 리퀘스트가 아닐 때만 이미지를 푸시함
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/next-app:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/next-app:${{ steps.package-version.outputs.version }}
+          cache-from: type=gha # GitHub Actions 캐시를 사용하여 빌드 속도 향상
+          cache-to: type=gha,mode=max # 최대한 캐싱하여 빌드 효율성 최적화
