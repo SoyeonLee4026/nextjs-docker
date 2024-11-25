@@ -42,9 +42,8 @@ jobs:
 
       # Semantic Release 실행 (main 브랜치 푸시 시에만)
       - name: Semantic Release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # GitHub API 접근을 위한 토큰 (시크릿)
+          GH_TOKEN: ${{ secrets.GH_TOKEN }} # GitHub API 접근을 위한 토큰 (시크릿)
         run: npx semantic-release # Semantic Release를 통해 자동 버전 관리 및 릴리스 생성
 
       # package.json에서 버전 추출
