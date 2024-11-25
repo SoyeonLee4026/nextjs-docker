@@ -12,6 +12,11 @@ on:
 jobs:
   build-and-push:
     runs-on: self-hosted # 자체 호스팅된 러너에서 작업을 실행
+     permissions:
+     contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for npm provenance
     steps:
       # 코드 체크아웃
       - name: Checkout code
@@ -43,7 +48,7 @@ jobs:
       # Semantic Release 실행 (main 브랜치 푸시 시에만)
       - name: Semantic Release
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }} # GitHub API 접근을 위한 토큰 (시크릿)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub API 접근을 위한 토큰 (시크릿)
         run: npx semantic-release # Semantic Release를 통해 자동 버전 관리 및 릴리스 생성
 
       # package.json에서 버전 추출
