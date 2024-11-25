@@ -12,8 +12,8 @@ on:
 jobs:
   build-and-push:
     runs-on: self-hosted # 자체 호스팅된 러너에서 작업을 실행
-     permissions:
-     contents: write # to be able to publish a GitHub release
+    permissions:
+      contents: write # to be able to publish a GitHub release
       issues: write # to be able to comment on released issues
       pull-requests: write # to be able to comment on released pull requests
       id-token: write # to enable use of OIDC for npm provenance
