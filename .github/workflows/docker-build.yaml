@@ -12,6 +12,9 @@ on:
 jobs:
   build-and-push:
     runs-on: self-hosted # 자체 호스팅된 러너에서 작업을 실행
+    environment: dev
+    env:
+      NEXT_PUBLIC_APP_SERVER_URL: ${{ vars.NEXT_PUBLIC_APP_SERVER_URL }}
     permissions:
       contents: write # to be able to publish a GitHub release
       issues: write # to be able to comment on released issues
@@ -67,3 +70,5 @@ jobs:
             ${{ secrets.DOCKER_HUB_USERNAME }}/next-app:${{ steps.package-version.outputs.version }}
           cache-from: type=gha # GitHub Actions 캐시를 사용하여 빌드 속도 향상
           cache-to: type=gha,mode=max # 최대한 캐싱하여 빌드 효율성 최적화
+          build-args: |
+            NEXT_PUBLIC_APP_SERVER_URL=${{ env.NEXT_PUBLIC_APP_SERVER_URL }}

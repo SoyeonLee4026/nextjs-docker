@@ -20,7 +20,11 @@ COPY --from=installer /app/node_modules ./node_modules
 # 환경 변수 설정 및 빌드
 ARG APP_ENV=production
 ENV APP_ENV=$APP_ENV
-RUN echo "$APP_ENV" && npm run build
+ARG NEXT_PUBLIC_APP_SERVER_URL
+ENV NEXT_PUBLIC_APP_SERVER_URL=$NEXT_PUBLIC_APP_SERVER_URL
+RUN echo "APP_ENV: $APP_ENV" && \
+    echo "NEXT_PUBLIC_APP_SERVER_URL: $NEXT_PUBLIC_APP_SERVER_URL" && \
+    npm run build
 # Runner 단계 - 프로덕션 실행 환경 준비
 FROM base AS runner
 # 환경 변수 설정
@@ -35,6 +39,11 @@ USER 1100:1100
 COPY --from=builder --chown=1100:1100 /app/.next/standalone ./
 COPY --from=builder --chown=1100:1100 /app/.next/static ./.next/static
 COPY --from=builder --chown=1100:1100 /app/public ./public
+
+# NEXT_PUBLIC_APP_SERVER_URL 환경 변수를 런타임에도 사용할 수 있도록 설정
+ARG NEXT_PUBLIC_APP_SERVER_URL
+ENV NEXT_PUBLIC_APP_SERVER_URL=$NEXT_PUBLIC_APP_SERVER_URL
+
 # 포트 설정
 EXPOSE 3000
 ENV PORT=3000
