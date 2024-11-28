@@ -26,6 +26,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # 전체 Git 히스토리를 가져와서 작업
+          fetch-tags: true
 
       # Node.js 설정
       - name: Set up Node.js
@@ -52,6 +53,7 @@ jobs:
       - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub API 접근을 위한 토큰 (시크릿)
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release # Semantic Release를 통해 자동 버전 관리 및 릴리스 생성
 
       # package.json에서 버전 추출
