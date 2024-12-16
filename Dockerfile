@@ -22,9 +22,7 @@ ARG APP_ENV=production
 ENV APP_ENV=$APP_ENV
 ARG NEXT_PUBLIC_APP_SERVER_URL
 ENV NEXT_PUBLIC_APP_SERVER_URL=$NEXT_PUBLIC_APP_SERVER_URL
-RUN echo "APP_ENV: $APP_ENV" && \
-    echo "NEXT_PUBLIC_APP_SERVER_URL: $NEXT_PUBLIC_APP_SERVER_URL" && \
-    npm run build
+RUN npm run build
 # Runner 단계 - 프로덕션 실행 환경 준비
 FROM base AS runner
 # 환경 변수 설정
